@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prontuário Veterinário</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f2;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #a2d5c6;
+      padding: 1rem;
+      text-align: center;
+    }
+    main {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      padding: 0.7rem 1.2rem;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #output {
+      background-color: #eef;
+      padding: 1rem;
+      margin-top: 1rem;
+      white-space: pre-line;
+      border-radius: 5px;
+    }
+    #consultas {
+      margin-top: 2rem;
+      background: #fafafa;
+      border: 1px dashed #aaa;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Prontuário Veterinário</h1>
+    <p>Com histórico salvo no navegador</p>
+  </header>
+
+  <main>
+    <h2>Nova Consulta</h2>
+    <input type="text" id="tutor" placeholder="Nome do tutor" />
+    <input type="text" id="pet" placeholder="Nome do animal" />
+    <input type="text" id="raca" placeholder="Raça" />
+    <input type="number" id="idade" placeholder="Idade (anos)" />
+    <input type="text" id="peso" placeholder="Peso (kg)" />
+    <textarea id="sintomas" placeholder="Sintomas apresentados"></textarea>
+    <textarea id="diagnostico" placeholder="Diagnóstico"></textarea>
+    <textarea id="tratamento" placeholder="Tratamento e recomendações"></textarea>
+
+    <button onclick="salvarConsulta()">Salvar Consulta</button>
+
+    <div id="output"></div>
+
+    <div id="consultas">
+      <h3>📚 Consultas anteriores</h3>
+      <select id="listaConsultas" onchange="mostrarConsultaSelecionada()">
+        <option value="">Selecione uma consulta</option>
+      </select>
+    </div>
+  </main>
+
+  <script>
+    function salvarConsulta() {
+      const data = new Date().toLocaleString();
+      const consulta = {
+        tutor: document.getElementById('tutor').value,
+        pet: document.getElementById('pet').value,
+        raca: document.getElementById('raca').value,
+        idade: document.getElementById('idade').value,
+        peso: document.getElementById('peso').value,
+        sintomas: document.getElementById('sintomas').value,
+        diagnostico: document.getElementById('diagnostico').value,
+        tratamento: document.getElementById('tratamento').value,
+        data: data
+      };
+
+      let prontuarios = JSON.parse(localStorage.getItem('prontuarios') || '[]');
+      prontuarios.push(consulta);
+      localStorage.setItem('prontuarios', JSON.stringify(prontuarios));
+
+      alert("Consulta salva com sucesso!");
+      limparCampos();
+      carregarConsultas();
+    }
+
+    function carregarConsultas() {
+      const lista = document.getElementById('listaConsultas');
+      lista.innerHTML = '<option value="">Selecione uma consulta</option>';
+      const prontuarios = JSON.parse(localStorage.getItem('prontuarios') || '[]');
+      prontuarios.forEach((p, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.text = `${p.pet} (${p.data})`;
+        lista.appendChild(option);
+      });
+    }
+
+    function mostrarConsultaSelecionada() {
+      const index = document.getElementById('listaConsultas').value;
+      if (index === '') return;
+      const prontuarios = JSON.parse(localStorage.getItem('prontuarios') || '[]');
+      const p = prontuarios[index];
+      const prontuario = `
+📋 Consulta registrada em ${p.data}
+
+👤 Tutor: ${p.tutor}
+🐾 Animal: ${p.pet}
+📌 Raça: ${p.raca}
+🎂 Idade: ${p.idade} ano(s)
+⚖️ Peso: ${p.peso} kg
+
+🩺 Sintomas:
+${p.sintomas}
+
+🧪 Diagnóstico:
+${p.diagnostico}
+
+💊 Tratamento:
+${p.tratamento}
+      `;
+      document.getElementById('output').innerText = prontuario;
+    }
+
+    function limparCampos() {
+      ['tutor','pet','raca','idade','peso','sintomas','diagnostico','tratamento'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+    }
+
+    window.onload = carregarConsultas;
+  </script>
+</body>
+</html>
